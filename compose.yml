@@ -3,7 +3,7 @@ services:
     build:
       context: .
     volumes:
-      - ./work:/work
+      - .:/work
       - ${SSH_AUTH_SOCK}:/ssh-agent
     environment:
       SSH_AUTH_SOCK: /ssh-agent
