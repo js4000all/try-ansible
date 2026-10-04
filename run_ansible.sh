@@ -59,9 +59,7 @@ trap cleanup EXIT HUP INT TERM
 
 ssh-add "$SSH_KEY_PATH"
 
-docker compose run --rm \
-    -f compose.yml \
-    -f compose.ssh.yml \
+docker compose -f compose.yml -f compose.ssh.yml run --rm \
     -w /work \
     ops \
     "$ANSIBLE_CMD" -i "$INVENTORY" "$@"
