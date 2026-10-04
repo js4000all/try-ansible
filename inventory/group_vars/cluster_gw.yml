@@ -1,0 +1,3 @@
+# group_vars/cluster_gw.yml
+ansible_become_method: doas
+ansible_user: user1
