@@ -4,9 +4,5 @@ services:
       context: .
     volumes:
       - .:/work
-      - ${SSH_AUTH_SOCK}:/ssh-agent
-      - ${HOME}/.ssh/known_hosts:/home/ubuntu/.ssh/known_hosts:ro
-    environment:
-      SSH_AUTH_SOCK: /ssh-agent
     command: sleep infinity
     init: true
