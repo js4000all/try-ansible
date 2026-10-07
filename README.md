@@ -122,3 +122,33 @@ bootstrapでは以下を実施する。
 IPアドレスの固定化、hostname、SSHのセキュリティ設定、Docker、Git、GWのルーティングなどは通常のplaybookで管理する。
 
 bootstrapで確立した管理経路と権限は、通常のplaybookでも維持する。
+
+## run_ansible.shについて
+
+`run_ansible.sh`は以下を行っている。
+
+- コンテナ上で`ansbible`または`ansible-playbook`を実行
+- コンテナ内にssh鍵を引き継ぐために、ssh-agentを自動起動・停止
+- インベントリ定義ファイル、ssh秘密鍵は`.env`で指定
+
+
+## bootstrapする
+
+`playbook/bootstrap.yml`を実行し、通常のplaybookを実行できる最低限の下地を整える。
+
+limitを指定して、bootstrap用playbookが通るか確認。
+
+```bash
+./run_ansible.sh \
+  playbooks/bootstrap.yml \
+  --limit dev_pc \
+  --ask-pass
+```
+
+成功したら、パスワードなしで動作することを確認。
+```bash
+./run_ansible.sh \
+  playbooks/bootstrap.yml \
+  --limit dev_pc
+```
+
