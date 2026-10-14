@@ -1,6 +1,6 @@
 # group_vars/all/network.yml
 
-network_prefix: 24
+network_prefix_length: 24
 network_gateway: 192.168.1.1
 
 network_dns_servers:
