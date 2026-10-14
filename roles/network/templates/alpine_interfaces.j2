@@ -1,0 +1,9 @@
+# This file is managed by Ansible. Manual changes will be overwritten.
+
+auto lo
+iface lo inet loopback
+
+auto {{ network_interface }}
+iface {{ network_interface }} inet static
+    address {{ network_ipv4_address }}/{{ network_prefix_length }}
+    gateway {{ network_gateway }}

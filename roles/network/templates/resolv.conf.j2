@@ -1,0 +1,5 @@
+# This file is managed by Ansible. Manual changes will be overwritten.
+
+{% for dns in network_dns_servers %}
+nameserver {{ dns }}
+{% endfor %}

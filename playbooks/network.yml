@@ -1,0 +1,60 @@
+---
+- name: Configure network
+  hosts: all
+  become: true
+  serial: 1
+
+  pre_tasks:
+    - name: Validate required host variables
+      ansible.builtin.assert:
+        that:
+          - network_interface is defined
+          - network_ipv4_address is defined
+        fail_msg: >-
+          network_interface and network_ipv4_address
+          must be defined for {{ inventory_hostname }}.
+
+  roles:
+    - network
+
+  post_tasks:
+    - name: Reboot to apply network configuration
+      ansible.builtin.reboot:
+        reboot_timeout: 300
+      when: ansible_host == network_ipv4_address
+
+    - name: Reboot without waiting for old address
+      ansible.builtin.shell: "sleep 2 && reboot"
+      async: 1
+      poll: 0
+      when: ansible_host != network_ipv4_address
+
+    - name: Switch Ansible connection to static IP
+      ansible.builtin.set_fact:
+        ansible_host: "{{ network_ipv4_address }}"
+      when: ansible_host != network_ipv4_address
+
+    - name: Wait for SSH on static IP
+      ansible.builtin.wait_for_connection:
+        delay: 5
+        timeout: 300
+
+    - name: Verify configured IPv4 address
+      ansible.builtin.command:
+        argv:
+          - ip
+          - -4
+          - addr
+          - show
+          - dev
+          - "{{ network_interface }}"
+      register: network_ip_result
+      changed_when: false
+
+    - name: Verify static IPv4 address is active
+      ansible.builtin.assert:
+        that:
+          - network_ipv4_address in network_ip_result.stdout
+        fail_msg: >-
+          Expected IPv4 address {{ network_ipv4_address }}
+          was not found on {{ network_interface }}.

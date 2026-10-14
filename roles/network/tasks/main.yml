@@ -1,0 +1,22 @@
+- name: Validate network variables
+  ansible.builtin.assert:
+    that:
+      - network_interface is defined
+      - network_ipv4_address is defined
+      - network_prefix_length is defined
+      - network_gateway is defined
+      - network_dns_servers is defined
+      - network_dns_servers | length > 0
+
+- name: Configure Debian network
+  ansible.builtin.include_tasks: debian.yml
+  when: ansible_distribution == "Debian"
+
+- name: Configure Alpine network
+  ansible.builtin.include_tasks: alpine.yml
+  when: ansible_distribution == "Alpine Linux"
+
+- name: Reject unsupported OS
+  ansible.builtin.fail:
+    msg: "Unsupported distribution: {{ ansible_distribution }}"
+  when: ansible_distribution not in ["Debian", "Alpine Linux"]

@@ -1,0 +1,13 @@
+# This file is managed by Ansible. Manual changes will be overwritten.
+
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+allow-hotplug {{ network_interface }}
+iface {{ network_interface }} inet static
+    address {{ network_ipv4_address }}/{{ network_prefix_length }}
+    gateway {{ network_gateway }}
+
+iface {{ network_interface }} inet6 auto
