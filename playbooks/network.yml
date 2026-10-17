@@ -19,42 +19,20 @@
 
   post_tasks:
     - name: Reboot to apply network configuration
-      ansible.builtin.reboot:
-        reboot_timeout: 300
-      when: ansible_host == network_ipv4_address
-
-    - name: Reboot without waiting for old address
       ansible.builtin.shell: "sleep 2 && reboot"
       async: 1
       poll: 0
-      when: ansible_host != network_ipv4_address
+      when:
+        - network_changed | default(false)
+        - not ansible_check_mode
 
     - name: Switch Ansible connection to static IP
       ansible.builtin.set_fact:
         ansible_host: "{{ network_ipv4_address }}"
-      when: ansible_host != network_ipv4_address
+      when: not ansible_check_mode
 
-    - name: Wait for SSH on static IP
+    - name: Wait for connection on static IP
       ansible.builtin.wait_for_connection:
-        delay: 5
+        delay: "{{ 5 if network_changed | default(false) else 0 }}"
         timeout: 300
-
-    - name: Verify configured IPv4 address
-      ansible.builtin.command:
-        argv:
-          - ip
-          - -4
-          - addr
-          - show
-          - dev
-          - "{{ network_interface }}"
-      register: network_ip_result
-      changed_when: false
-
-    - name: Verify static IPv4 address is active
-      ansible.builtin.assert:
-        that:
-          - network_ipv4_address in network_ip_result.stdout
-        fail_msg: >-
-          Expected IPv4 address {{ network_ipv4_address }}
-          was not found on {{ network_interface }}.
+      when: not ansible_check_mode

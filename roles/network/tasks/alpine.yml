@@ -8,6 +8,7 @@
     group: root
     mode: "0644"
     backup: true
+  register: network_interfaces_result
 
 - name: Configure DNS resolver
   ansible.builtin.template:
@@ -17,3 +18,12 @@
     group: root
     mode: "0644"
     backup: true
+  register: network_dns_result
+
+- name: Set network changed flag
+  ansible.builtin.set_fact:
+    network_changed: >-
+      {{
+        network_interfaces_result.changed
+        or network_dns_result.changed
+      }}
