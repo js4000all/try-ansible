@@ -1,0 +1,8 @@
+---
+- name: Configure development PCs
+  hosts: dev_pc
+  become: true
+
+  roles:
+    - docker
+  
