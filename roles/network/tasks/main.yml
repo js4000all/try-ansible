@@ -10,13 +10,13 @@
 
 - name: Configure Debian network
   ansible.builtin.include_tasks: debian.yml
-  when: ansible_distribution == "Debian"
+  when: ansible_facts["distribution"] == "Debian"
 
 - name: Configure Alpine network
   ansible.builtin.include_tasks: alpine.yml
-  when: ansible_distribution == "Alpine Linux"
+  when: ansible_facts["distribution"] == "Alpine Linux"
 
 - name: Reject unsupported OS
   ansible.builtin.fail:
     msg: "Unsupported distribution: {{ ansible_distribution }}"
-  when: ansible_distribution not in ["Debian", "Alpine Linux"]
+  when: ansible_facts["distribution"] not in ["Debian", "Alpine Linux"]
