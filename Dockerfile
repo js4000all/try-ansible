@@ -7,6 +7,8 @@ RUN apt-get update && apt-get upgrade -y \
         iputils-ping
 
 USER ubuntu
-RUN ansible-galaxy collection install ansible.posix
+RUN ansible-galaxy collection install \
+      ansible.posix \
+      community.general
 
 WORKDIR /work
