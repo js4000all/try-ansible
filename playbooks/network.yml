@@ -26,13 +26,25 @@
         - network_changed | default(false)
         - not ansible_check_mode
 
+    - name: Wait for SSH port on static IP
+      ansible.builtin.wait_for:
+        host: "{{ network_ipv4_address }}"
+        port: 22
+        timeout: 300
+        state: started
+      delegate_to: localhost
+      become: false
+      when: not ansible_check_mode
+
     - name: Switch Ansible connection to static IP
       ansible.builtin.set_fact:
         ansible_host: "{{ network_ipv4_address }}"
       when: not ansible_check_mode
 
-    - name: Wait for connection on static IP
+    - name: Reset SSH connection
+      ansible.builtin.meta: reset_connection
+
+    - name: Wait for Ansible connection on static IP
       ansible.builtin.wait_for_connection:
-        delay: "{{ 5 if network_changed | default(false) else 0 }}"
-        timeout: 300
+        timeout: 60
       when: not ansible_check_mode
