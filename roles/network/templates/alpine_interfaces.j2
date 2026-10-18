@@ -7,3 +7,7 @@ auto {{ network_interface }}
 iface {{ network_interface }} inet static
     address {{ network_ipv4_address }}/{{ network_prefix_length }}
     gateway {{ network_gateway }}
+{% if network_wifi_ssid is defined %}
+    wpa-ssid {{ network_wifi_ssid }}
+    wpa-psk {{ network_wifi_psk }}
+{% endif %}

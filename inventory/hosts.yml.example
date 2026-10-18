@@ -10,6 +10,8 @@ all:
           ansible_host: 192.168.1.xx
           network_interface: xx
           network_ipv4_address: 192.168.1.xx
+          network_wifi_ssid: xxx
+          network_wifi_psk: xxx
         k3:
           ansible_host: 192.168.1.xx
           network_interface: xx
@@ -20,3 +22,5 @@ all:
           ansible_host: 192.168.1.xx
           network_interface: xx
           network_ipv4_address: 192.168.1.xx
+          network_wifi_ssid: xxx
+          network_wifi_psk: xxx
