@@ -6,23 +6,31 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+from typing import Any, TypeAlias
 
 
-def run(command, *, input=None, check=True):
+KeyId: TypeAlias = tuple[str, str]
+HostKeys: TypeAlias = dict[str, set[str]]
+InventoryVars: TypeAlias = dict[str, Any]
+
+
+def run(
+    command: list[str], *, input: str | None = None, check: bool = True
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(command, input=input, text=True, capture_output=True, check=check)
 
 
-def host_label(address, port):
+def host_label(address: str, port: int) -> str:
     return address if port == 22 else f"[{address}]:{port}"
 
 
-def existing_keys(path, label):
+def existing_keys(path: Path, label: str) -> HostKeys:
     if not path.exists():
         return {}
     result = run(["ssh-keygen", "-F", label, "-f", str(path)], check=False)
     if result.returncode not in (0, 1):
         raise RuntimeError(result.stderr.strip() or f"ssh-keygen -F failed for {label}")
-    keys = {}
+    keys: HostKeys = {}
     for line in result.stdout.splitlines():
         if line.startswith("#") or not line.strip():
             continue
@@ -32,10 +40,9 @@ def existing_keys(path, label):
     return keys
 
 
-
-def trusted_keys(path):
+def trusted_keys(path: Path) -> set[KeyId]:
     """Return host public keys already present anywhere in known_hosts."""
-    trusted = set()
+    trusted: set[KeyId] = set()
     if not path.exists():
         return trusted
     for line in path.read_text(encoding="utf-8").splitlines():
@@ -50,13 +57,13 @@ def trusted_keys(path):
     return trusted
 
 
-def fingerprint(key_type, key):
+def fingerprint(key_type: str, key: str) -> str:
     result = run(["ssh-keygen", "-lf", "-", "-E", "sha256"],
                  input=f"{key_type} {key}\n")
     return result.stdout.strip()
 
 
-def confirm_new_keys(new_keys, sources):
+def confirm_new_keys(new_keys: set[KeyId], sources: dict[KeyId, set[str]]) -> None:
     if not new_keys:
         return
     if not sys.stdin.isatty():
@@ -71,7 +78,7 @@ def confirm_new_keys(new_keys, sources):
             raise RuntimeError("Confirmation declined; known_hosts was not modified")
 
 
-def main():
+def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("-i", "--inventory", default="hosts.yml")
     parser.add_argument("-f", "--known-hosts", type=Path, default=Path.home() / ".ssh/known_hosts")
@@ -79,22 +86,22 @@ def main():
     path = args.known_hosts.expanduser()
 
     inventory = json.loads(run(["ansible-inventory", "-i", args.inventory, "--list"]).stdout)
-    hostvars = inventory.get("_meta", {}).get("hostvars", {})
+    hostvars: dict[str, InventoryVars] = inventory.get("_meta", {}).get("hostvars", {})
     if not hostvars:
         raise RuntimeError("No hosts found in inventory")
 
     # Collect keys first; do not touch known_hosts until every scan is successful.
-    wanted = {}  # label -> {key_type: base64_key}
-    sources = {}  # (key_type, base64_key) -> host names
+    wanted: dict[str, dict[str, str]] = {}  # label -> {key_type: base64_key}
+    sources: dict[KeyId, set[str]] = {}  # (key_type, base64_key) -> host names
     for name, variables in sorted(hostvars.items()):
-        current = variables.get("ansible_host", name)
+        current = str(variables.get("ansible_host", name))
         future = variables.get("network_ipv4_address")
         if not future:
             print(f"SKIP {name}: network_ipv4_address is unset", file=sys.stderr)
             continue
         port = int(variables.get("ansible_port", 22))
-        scan = run(["ssh-keyscan", "-T", "5", "-p", str(port), "-t", "ed25519,ecdsa,rsa", str(current)], check=False)
-        found = {}
+        scan = run(["ssh-keyscan", "-T", "5", "-p", str(port), "-t", "ed25519", str(current)], check=False)
+        found: dict[str, str] = {}
         for line in scan.stdout.splitlines():
             fields = line.split()
             if len(fields) >= 3 and not line.startswith("#"):
@@ -103,7 +110,7 @@ def main():
             raise RuntimeError(f"{name} ({current}): ssh-keyscan returned no host keys: {scan.stderr.strip()}")
         for key_type, key in found.items():
             sources.setdefault((key_type, key), set()).add(f"{name} ({current} -> {future})")
-        for address in {str(current), str(future)}:
+        for address in {current, str(future)}:
             label = host_label(address, port)
             target = wanted.setdefault(label, {})
             for key_type, key in found.items():
@@ -112,9 +119,9 @@ def main():
                 target[key_type] = key
         print(f"SCAN {name}: {current} -> {future} ({len(found)} key types)")
 
-    additions = []
+    additions: list[str] = []
     trusted = trusted_keys(path)
-    untrusted = set()
+    untrusted: set[KeyId] = set()
     for label, keys in sorted(wanted.items()):
         old = existing_keys(path, label)
         for key_type, key in sorted(keys.items()):

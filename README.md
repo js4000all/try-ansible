@@ -1,5 +1,43 @@
 # Ansible demo
 
+## prepare_known_hosts.py
+
+Ansibleのinventoryを参照し、対象ホストのSSHホスト公開鍵を収集して `known_hosts` に登録するスクリプトです。
+
+### 前提条件
+
+- Python 3.10以降
+- Ansible（`ansible-inventory` コマンド）
+- OpenSSHクライアント（`ssh-keyscan`、`ssh-keygen` コマンド）
+- 対象ホストにSSH接続可能であること
+
+本リポジトリではコンテナ内で実行すればOK。
+
+```bash
+docker compose run --rm -v "${HOME}/.ssh:/mnt/ssh" ops ./prepare_known_hosts.py -i inventory/hosts.yml -f /mnt/ssh/known_hosts
+```
+
+このコマンドでは、ホスト側の`.ssh`ディレクトリをマウントし、その中の`known_hosts`ファイルを変更対象として指定しています。
+
+`hosts.yml` には、各ホストについて次の変数を定義されていることが前提(`hosts.yml.example`参照)。
+
+- `ansible_host`：現在の接続先IPアドレス
+- `network_ipv4_address`：変更後の固定IPアドレス
+
+### 処理内容
+
+1. `ansible-inventory` からホストとIPアドレスを取得する。
+2. 現在のIPアドレスに対して `ssh-keyscan` を実行し、SSHホスト公開鍵を収集する。
+3. 未登録の公開鍵についてfingerprintを表示し、ユーザーに承認を求める。
+4. 承認された公開鍵を、現在のIPアドレスと変更後のIPアドレスの両方に紐づけて `known_hosts` に登録する。
+
+すでに登録されている公開鍵なら再承認を求めません。
+
+既存のIPアドレスに異なる公開鍵が登録されている場合は、上書きせずエラーで終了します。
+
+**すべての確認が完了するまで `known_hosts` は更新しません。**
+
+
 ## 初期セットアップ
 
 Ansibleによるbootstrapを実行する前に、管理対象マシンを手作業でセットアップする。
