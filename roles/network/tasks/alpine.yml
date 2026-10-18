@@ -20,10 +20,22 @@
     backup: true
   register: network_dns_result
 
+- name: Disable IPv6 in dhcpcd
+  ansible.builtin.lineinfile:
+    path: /etc/dhcpcd.conf
+    line: "noipv6"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+    backup: true
+  register: network_dhcpcd_result
+
 - name: Set network changed flag
   ansible.builtin.set_fact:
     network_changed: >-
       {{
         network_interfaces_result.changed
         or network_dns_result.changed
+        or network_dhcpcd_result.changed
       }}
