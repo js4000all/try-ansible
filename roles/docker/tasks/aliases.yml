@@ -1,0 +1,10 @@
+# tasks/aliases.yml
+---
+- name: Configure Docker CLI aliases
+  ansible.builtin.blockinfile:
+    path: "/home/{{ ansible_user }}/.bash_aliases"
+    create: true
+    owner: "{{ ansible_user }}"
+    mode: "0644"
+    marker: "# {mark} ANSIBLE MANAGED DOCKER ALIASES"
+    block: "{{ lookup('file', role_path ~ '/files/aliases.sh') }}"

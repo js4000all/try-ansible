@@ -1,0 +1,5 @@
+alias doc='docker'
+alias doci='docker image'
+alias docc='docker container'
+alias docv='docker volume'
+alias com='docker compose'

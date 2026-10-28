@@ -13,3 +13,6 @@
 
 - name: Configure Docker services
   ansible.builtin.import_tasks: service.yml
+
+- name: Configure Docker aliases
+  ansible.builtin.import_tasks: aliases.yml
