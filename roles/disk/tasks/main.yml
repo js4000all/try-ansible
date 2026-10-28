@@ -15,3 +15,10 @@
     state: present
     part_start: 1MiB
     part_end: 100%
+
+- name: Create data disk filesystem
+  community.general.filesystem:
+    dev: "{{ data_disk_device }}-part1"
+    fstype: ext4
+    state: present
+    force: false
