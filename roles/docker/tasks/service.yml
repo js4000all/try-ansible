@@ -1,4 +1,24 @@
 ---
+- name: Create containerd systemd drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/system/containerd.service.d
+    state: directory
+    mode: "0755"
+
+- name: Require data disk for containerd
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/containerd.service.d/storage.conf
+    content: |
+      [Unit]
+      RequiresMountsFor={{ data_disk_mount_path }}
+    mode: "0644"
+  register: containerd_storage_override
+
+- name: Reload systemd configuration
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: containerd_storage_override.changed
+
 - name: Enable and start Docker service
   ansible.builtin.systemd_service:
     name: docker
