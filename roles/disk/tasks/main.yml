@@ -32,3 +32,11 @@
     dump: "0"
     passno: "2"
     state: mounted
+
+- name: Configure data disk mount point permissions
+  ansible.builtin.file:
+    path: "{{ data_disk_mount_path }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"

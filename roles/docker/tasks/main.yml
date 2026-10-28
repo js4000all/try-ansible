@@ -1,4 +1,10 @@
 ---
+- name: Verify data disk is mounted
+  ansible.builtin.assert:
+    that:
+      - data_disk_mount_path in ansible_facts.mounts | map(attribute='mount') | list
+    fail_msg: "{{ data_disk_mount_path }} is not mounted"
+
 - name: Install Docker repository prerequisites
   ansible.builtin.apt:
     name:
