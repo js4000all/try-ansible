@@ -7,3 +7,31 @@
       - "{{ data_disk_mount_path }}"
   register: data_disk_mount_check
   changed_when: false
+
+- name: Configure Docker data root
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "data-root": "{{ data_disk_mount_path }}/docker"
+      }
+    owner: root
+    group: root
+    mode: "0644"
+  register: docker_storage_config
+
+- name: Configure containerd data root
+  ansible.builtin.lineinfile:
+    path: /etc/containerd/config.toml
+    regexp: '^#?root\s*='
+    line: 'root = "{{ data_disk_mount_path }}/containerd"'
+    state: present
+  register: containerd_storage_config
+
+- name: Determine whether storage services need restart
+  ansible.builtin.set_fact:
+    docker_storage_restart_required: >-
+      {{
+        docker_storage_config.changed or
+        containerd_storage_config.changed
+      }}
