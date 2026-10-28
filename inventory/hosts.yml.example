@@ -7,6 +7,11 @@ all:
           network_interface: xx
           network_ipv4_address: 192.168.1.xx
           data_disk_device: /dev/disk/by-id/xxx
+          git_config:
+            user.name: "Your Name"
+            user.email: "you@example.com"
+            init.defaultBranch: main
+            pull.ff: only
         k2:
           ansible_host: 192.168.1.xx
           network_interface: xx

@@ -4,5 +4,11 @@
   become: true
 
   roles:
-    - disk
-    - docker
+    - role: disk
+      tags: disk
+
+    - role: docker
+      tags: docker
+
+    - role: git
+      tags: git

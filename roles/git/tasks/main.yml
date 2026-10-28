@@ -1,0 +1,12 @@
+- name: Install Git
+  ansible.builtin.apt:
+    name: git
+    state: present
+  become: true
+
+- name: Configure Git
+  community.general.git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop: "{{ git_config | dict2items }}"
