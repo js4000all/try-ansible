@@ -6,6 +6,7 @@ all:
           ansible_host: 192.168.1.xx
           network_interface: xx
           network_ipv4_address: 192.168.1.xx
+          data_disk_device: /dev/disk/by-id/xxx
         k2:
           ansible_host: 192.168.1.xx
           network_interface: xx

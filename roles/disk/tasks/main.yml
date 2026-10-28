@@ -1,0 +1,17 @@
+---
+- name: Install disk management packages
+  ansible.builtin.apt:
+    name:
+      - parted
+      - e2fsprogs
+    state: present
+
+- name: Create data disk partition
+  community.general.parted:
+    device: "{{ data_disk_device }}"
+    label: gpt
+    number: 1
+    name: data
+    state: present
+    part_start: 1MiB
+    part_end: 100%

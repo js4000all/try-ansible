@@ -2,3 +2,7 @@
 ansible_become_method: sudo
 ansible_user: user1
 ansible_python_interpreter: /usr/bin/python3
+
+data_disk_mount_path: /data
+docker_data_root: "{{ data_disk_mount_path }}/docker"
+containerd_root: "{{ data_disk_mount_path }}/containerd"
