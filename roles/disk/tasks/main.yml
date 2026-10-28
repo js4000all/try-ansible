@@ -22,3 +22,13 @@
     fstype: ext4
     state: present
     force: false
+
+- name: Configure data disk mount
+  ansible.posix.mount:
+    path: "{{ data_disk_mount_path }}"
+    src: "{{ data_disk_device }}-part1"
+    fstype: ext4
+    opts: defaults,nofail
+    dump: "0"
+    passno: "2"
+    state: mounted
