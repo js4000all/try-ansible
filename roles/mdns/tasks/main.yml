@@ -1,0 +1,14 @@
+---
+- name: Install mDNS packages
+  ansible.builtin.apt:
+    name:
+      - avahi-daemon
+      - libnss-mdns
+      - avahi-utils
+    state: present
+
+- name: Enable Avahi daemon
+  ansible.builtin.systemd_service:
+    name: avahi-daemon.service
+    enabled: true
+    state: started
