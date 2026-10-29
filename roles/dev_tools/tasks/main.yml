@@ -1,0 +1,6 @@
+---
+- name: Install development tools
+  ansible.builtin.apt:
+    name:
+      - make
+    state: present

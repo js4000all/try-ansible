@@ -15,3 +15,6 @@
 
     - role: wol
       tags: wol
+
+    - role: dev_tools
+      tags: dev_tools
