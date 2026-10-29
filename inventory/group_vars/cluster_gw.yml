@@ -1,4 +1,4 @@
-# group_vars/cluster_gw.yml
+---
 ansible_become_method: sudo
 ansible_user: user1
 ansible_python_interpreter: /usr/bin/python3
