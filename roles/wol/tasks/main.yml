@@ -1,0 +1,74 @@
+---
+- name: Validate network interface
+  ansible.builtin.assert:
+    that:
+      - network_interface is defined
+      - network_interface | length > 0
+    fail_msg: "network_interface must be defined."
+
+- name: Check Wake-on-LAN interface
+  ansible.builtin.command:
+    cmd: "ip link show {{ network_interface }}"
+  changed_when: false
+  check_mode: false
+
+- name: Install ethtool
+  ansible.builtin.apt:
+    name: ethtool
+    state: present
+
+- name: Check whether ethtool is available
+  ansible.builtin.stat:
+    path: /usr/sbin/ethtool
+  register: wol_ethtool
+
+- name: Read Wake-on-LAN capabilities
+  ansible.builtin.command:
+    cmd: "ethtool {{ network_interface }}"
+  register: wol_ethtool_info
+  changed_when: false
+  check_mode: false
+  when: wol_ethtool.stat.executable | default(false)
+
+- name: Validate Magic Packet support
+  ansible.builtin.assert:
+    that:
+      - wol_ethtool_info.stdout is regex('(?m)^\\s*Supports Wake-on:.*g')
+    fail_msg: >-
+      {{ network_interface }} does not support Wake-on-LAN via Magic Packet.
+  when: wol_ethtool.stat.executable | default(false)
+
+- name: Install Wake-on-LAN systemd unit
+  ansible.builtin.template:
+    src: wake-on-lan.service.j2
+    dest: /etc/systemd/system/wake-on-lan.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload systemd
+
+- name: Apply pending handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Enable Wake-on-LAN service
+  ansible.builtin.systemd_service:
+    name: wake-on-lan.service
+    enabled: true
+    state: started
+  when: not ansible_check_mode
+
+- name: Read Wake-on-LAN state
+  ansible.builtin.command:
+    cmd: "ethtool {{ network_interface }}"
+  register: wol_ethtool_state
+  changed_when: false
+  check_mode: false
+  when: not ansible_check_mode
+
+- name: Verify Wake-on-LAN is enabled
+  ansible.builtin.assert:
+    that:
+      - "'Wake-on: g' in wol_ethtool_state.stdout"
+    fail_msg: >-
+      Wake-on-LAN could not be enabled on {{ network_interface }}.
+  when: not ansible_check_mode

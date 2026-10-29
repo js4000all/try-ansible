@@ -12,3 +12,6 @@
 
     - role: git
       tags: git
+
+    - role: wol
+      tags: wol
