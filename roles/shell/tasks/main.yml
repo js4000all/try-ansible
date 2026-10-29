@@ -1,0 +1,3 @@
+---
+- name: Configure shell aliases
+  ansible.builtin.import_tasks: aliases.yml

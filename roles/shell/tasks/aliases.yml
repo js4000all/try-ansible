@@ -1,0 +1,10 @@
+---
+- name: Configure common Bash aliases
+  ansible.builtin.blockinfile:
+    path: "/home/{{ ansible_user }}/.bash_aliases"
+    create: true
+    owner: "{{ ansible_user }}"
+    mode: "0644"
+    marker: "# {mark} ANSIBLE MANAGED COMMON ALIASES"
+    block: "{{ lookup('template', role_path ~ '/templates/bash_aliases.j2') }}"
+  become: false

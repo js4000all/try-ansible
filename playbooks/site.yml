@@ -1,0 +1,6 @@
+---
+- name: Configure all nodes
+  ansible.builtin.import_playbook: common.yml
+
+- name: Configure development PCs
+  ansible.builtin.import_playbook: dev_pc.yml
