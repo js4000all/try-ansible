@@ -4,3 +4,6 @@
 
 - name: Configure timezone
   ansible.builtin.import_tasks: timezone.yml
+
+- name: Configure NTP client
+  ansible.builtin.import_tasks: ntp.yml
