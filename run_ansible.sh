@@ -17,6 +17,20 @@ set -a
 . "$ENV_FILE"
 set +a
 
+if [ "${1:-}" = "exec" ]; then
+    shift
+
+    if [ "$#" -eq 0 ]; then
+        echo "usage: $0 exec <command> [args...]" >&2
+        exit 1
+    fi
+
+    exec docker compose -f compose.yml run --rm \
+        -w /work \
+        ops \
+        "$@"
+fi
+
 : "${SSH_KEY_PATH:?SSH_KEY_PATH is not set}"
 : "${INVENTORY:?INVENTORY is not set}"
 
