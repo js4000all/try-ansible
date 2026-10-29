@@ -1,0 +1,11 @@
+---
+- name: Install timezone dependencies
+  ansible.builtin.apt:
+    name:
+      - util-linux-extra
+      - tzdata
+    state: present
+
+- name: Configure timezone
+  community.general.timezone:
+    name: "{{ system_timezone }}"
