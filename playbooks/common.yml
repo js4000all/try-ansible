@@ -4,4 +4,8 @@
   become: true
 
   roles:
-    - shell
+    - role: shell
+      tags: shell
+
+    - role: system
+      tags: system
