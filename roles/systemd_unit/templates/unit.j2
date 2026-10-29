@@ -1,0 +1,15 @@
+{# 汎用テンプレート #}
+{% for section, options in systemd_unit_config.items() %}
+[{{ section }}]
+{% for key, value in options.items() %}
+{% if value is iterable and value is not string %}
+{# 値がリスト（配列）の場合は、同じキーを複数行展開する（systemdの複数指定に対応） #}
+{% for item in value %}
+{{ key }}={{ item }}
+{% endfor %}
+{% else %}
+{{ key }}={{ value }}
+{% endif %}
+{% endfor %}
+
+{% endfor %}
