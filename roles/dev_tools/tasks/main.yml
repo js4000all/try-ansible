@@ -3,4 +3,6 @@
   ansible.builtin.apt:
     name:
       - make
+      - zip
+      - unzip
     state: present
