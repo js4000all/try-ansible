@@ -1,0 +1,30 @@
+---
+- name: Lookup Codex installation user
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ ansible_user }}"
+
+- name: Download Codex installer
+  ansible.builtin.get_url:
+    url: https://chatgpt.com/codex/install.sh
+    dest: /tmp/codex-install.sh
+    mode: "0644"
+
+- name: Install or update Codex CLI
+  ansible.builtin.command:
+    cmd: sh /tmp/codex-install.sh
+  become: false
+  environment:
+    HOME: "{{ codex_user_home }}"
+    CODEX_NON_INTERACTIVE: "true"
+    CODEX_RELEASE: latest
+  register: codex_install_result
+  changed_when: >-
+    'Installing Codex CLI' in codex_install_result.stdout
+    or 'Updating Codex CLI from ' in codex_install_result.stdout
+
+- name: Verify Codex CLI installation
+  ansible.builtin.command:
+    cmd: "{{ codex_binary_path }} --version"
+  become: false
+  changed_when: false
