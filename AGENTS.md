@@ -14,7 +14,9 @@ This repository manages machines with Ansible. Keep changes small, reviewable, a
 
 - Run `./lint.sh` after changing Ansible, YAML, or supporting scripts, and before reporting the work as complete.
 - This script runs `yamllint`, `ansible-lint`, and playbook syntax checks using the repository's Docker-based execution environment.
-- If the checks cannot run (for example, Docker, `.env`, or dependencies are missing), report that explicitly. Never claim validation succeeded without running it.
+- Check prerequisites before attempting validation: the repository working tree, Docker with Compose, and the local `.env` expected by `run_ansible.sh`. The lint commands run inside a Docker container; host-installed Ansible tools are not required.
+- Attempt `./lint.sh` at most once when prerequisites appear available. If a prerequisite is missing or the check fails because of an environment limitation, stop; do not repeatedly retry, install system dependencies, create placeholder credentials, or modify the environment solely to make lint run unless explicitly requested.
+- Report the specific blocker and mark validation as not run or incomplete. Never claim validation succeeded without running it.
 - Address relevant failures caused by your changes. Distinguish pre-existing failures from new ones, and report any remaining failures.
 - Review the diff for unintended changes and sensitive information.
 
