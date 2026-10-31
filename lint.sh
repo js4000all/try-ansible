@@ -11,7 +11,7 @@ echo "==> ansible-lint"
 ./run_ansible.sh exec ansible-lint .
 
 echo "==> Ansible syntax check"
-for playbook in playbook/*.yml; do
+for playbook in playbooks/*.yml; do
     [ -f "$playbook" ] || continue
 
     echo "Checking: $playbook"
