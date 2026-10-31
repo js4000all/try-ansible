@@ -21,3 +21,6 @@
 
     - role: mdns
       tags: mdns
+
+    - role: codex
+      tags: codex
