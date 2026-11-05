@@ -5,4 +5,6 @@
       - make
       - zip
       - unzip
+      - jq
     state: present
+
